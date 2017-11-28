@@ -5,8 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using System.Windows.Forms;
 
 namespace BRVariableEditor
 {
@@ -56,7 +58,6 @@ namespace BRVariableEditor
             try
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(IP + Ext + testExt);
-
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -133,6 +134,42 @@ namespace BRVariableEditor
             }
 
             return "";
+        }
+
+        public void SetVariables(string[] variables, string[] values)
+        {
+            for (int i =0; i<variables.Length;i++)
+            {
+                SetVariable(variables[i], values[i]);
+            }
+        }
+
+        public void SetVariablesThread(string[] variables, string[] values)
+        {
+            int remaining = variables.Length;
+            for (int i = 0; i < variables.Length; i++)
+            {
+                Thread t = new Thread(new ThreadStart(delegate {
+                    SetVariable(variables[i], values[i]);
+                    remaining--;
+                }));
+            }
+
+            while (remaining > 0) ;
+
+            return;
+        }
+
+        public string [] GetVariables(string [] variables)
+        {
+            string[] values = new string[variables.Length];
+
+            for(int i=0; i<variables.Length;i++)
+            {
+                values[i] = GetVariable(variables[i]);
+            }
+
+            return values;
         }
     }
 }
